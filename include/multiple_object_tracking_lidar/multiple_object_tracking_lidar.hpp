@@ -71,7 +71,7 @@ private:
     std::pair<int, int> findIndexOfMin(std::vector<std::vector<float>> distMat);
     void kft(const std_msgs::msg::Float32MultiArray ccs);
     void publish_cloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr &pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cluster);
-    void cloud_cb(const sensor_msgs::msg::PointCloud2::ConstPtr &input);
+    void cloud_cb(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &input);
 };
 
 }

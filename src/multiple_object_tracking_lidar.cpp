@@ -94,8 +94,8 @@ std::pair<int, int> MultipleObjectTrackingLidar::findIndexOfMin(std::vector<std:
   std::pair<int, int> minIndex;
   float minEl = std::numeric_limits<float>::max();
   std::cout << "minEl=" << minEl << "\n";
-  for (int i = 0; i < distMat.size(); i++)
-    for (int j = 0; j < distMat.at(0).size(); j++) {
+  for (size_t i = 0; i < distMat.size(); i++)
+    for (size_t j = 0; j < distMat.at(0).size(); j++) {
       if (distMat[i][j] < minEl) {
         minEl = distMat[i][j];
         minIndex = std::make_pair(i, j);
@@ -122,7 +122,6 @@ void MultipleObjectTrackingLidar::kft(const std_msgs::msg::Float32MultiArray ccs
   // data coming in, check the .z (every third) coordinate and that will be 0.0
   std::vector<geometry_msgs::msg::Point> clusterCenters; // clusterCenters
 
-  int i = 0;
   for (std::vector<float>::const_iterator it = ccs.data.begin();
        it != ccs.data.end(); it += 3) {
     geometry_msgs::msg::Point pt;
@@ -135,7 +134,6 @@ void MultipleObjectTrackingLidar::kft(const std_msgs::msg::Float32MultiArray ccs
 
   //  std::cout<<"CLusterCenters Obtained"<<"\n";
   std::vector<geometry_msgs::msg::Point> KFpredictions;
-  i = 0;
   for (auto it = pred.begin(); it != pred.end(); it++) {
     geometry_msgs::msg::Point pt;
     pt.x = (*it).at<float>(0);
@@ -196,7 +194,7 @@ void MultipleObjectTrackingLidar::kft(const std_msgs::msg::Float32MultiArray ccs
     // 3. distMat[i,:]=10000; distMat[:,j]=10000
     distMat[minIndex.first] =
         std::vector<float>(6, 10000.0); // Set the row to a high number.
-    for (int row = 0; row < distMat.size();
+    for (size_t row = 0; row < distMat.size();
          row++) // set the column to a high number
     {
       distMat[row][minIndex.second] = 10000.0;
@@ -309,7 +307,7 @@ void MultipleObjectTrackingLidar::publish_cloud(rclcpp::Publisher<sensor_msgs::m
   pub->publish(*clustermsg);
 }
 
-void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::ConstPtr &input)
+void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &input)
 {
   // std::cout<<"IF firstFrame="<<firstFrame<<"\n";
   // If this is the first frame, initialize kalman filters for the clustered
@@ -606,53 +604,52 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
 
     // cc_pos.publish(cc);// Publish cluster mid-points.
     kft(cc);
-    int i = 0;
-    bool publishedCluster[6];
+    size_t i = 0;
+    // bool publishedCluster[6];
     for (auto it = objID.begin(); it != objID.end();
          it++) { // std::cout<<"Inside the for loop\n";
 
       switch (i) {
-        std::cout << "Inside the switch case\n";
       case 0: {
         publish_cloud(pub_cluster0, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
+        // publishedCluster[i] =
+        //     true; // Use this flag to publish only once for a given obj ID
         i++;
         break;
       }
       case 1: {
         publish_cloud(pub_cluster1, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
+        // publishedCluster[i] =
+        //     true; // Use this flag to publish only once for a given obj ID
         i++;
         break;
       }
       case 2: {
         publish_cloud(pub_cluster2, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
+        // publishedCluster[i] =
+        //     true; // Use this flag to publish only once for a given obj ID
         i++;
         break;
       }
       case 3: {
         publish_cloud(pub_cluster3, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
+        // publishedCluster[i] =
+        //     true; // Use this flag to publish only once for a given obj ID
         i++;
         break;
       }
       case 4: {
         publish_cloud(pub_cluster4, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
+        // publishedCluster[i] =
+        //     true; // Use this flag to publish only once for a given obj ID
         i++;
         break;
       }
 
       case 5: {
         publish_cloud(pub_cluster5, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
+        // publishedCluster[i] =
+        //     true; // Use this flag to publish only once for a given obj ID
         i++;
         break;
       }
