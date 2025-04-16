@@ -39,7 +39,7 @@ MultipleObjectTrackingLidar::MultipleObjectTrackingLidar(
       this, std::placeholders::_1);
   sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(
         filtered_cloud,
-        1,
+        rclcpp::SensorDataQoS(),
         sub_callback);
   // Create a ROS publisher for the output point cloud
   pub_cluster0 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_0", 1);
@@ -55,7 +55,7 @@ MultipleObjectTrackingLidar::MultipleObjectTrackingLidar(
    */
 
   // cc_pos=this->create_publisher<std_msgs::msg::Float32MultiArray>("ccs", 100);//clusterCenter1
-  //markerPub = this->create_publisher<visualization_msgs::msg::Marker>("viz", 1);
+  markerPub = this->create_publisher<visualization_msgs::msg::MarkerArray>("viz", 1);
 
   /* Point cloud clustering
    */
@@ -214,8 +214,7 @@ void MultipleObjectTrackingLidar::kft(const std_msgs::msg::Float32MultiArray ccs
     std::cout<<"\n";
     */
 
-  //TODO: fix MarkerArray
-  //visualization_msgs::MarkerArray clusterMarkers;
+  visualization_msgs::msg::MarkerArray clusterMarkers;
 
   for (int i = 0; i < 6; i++) {
     visualization_msgs::msg::Marker m;
@@ -238,14 +237,12 @@ void MultipleObjectTrackingLidar::kft(const std_msgs::msg::Float32MultiArray ccs
     m.pose.position.y = clusterC.y;
     m.pose.position.z = clusterC.z;
 
-    //TODO: fix MarkerArray
-    //clusterMarkers.markers.push_back(m);
+    clusterMarkers.markers.push_back(m);
   }
 
   prevClusterCenters = clusterCenters;
 
-  //TODO: fix MarkerArray
-  //markerPub.publish(clusterMarkers);
+  markerPub->publish(clusterMarkers);
 
   std_msgs::msg::Int32MultiArray obj_id;
   for (auto it = objID.begin(); it != objID.end(); it++)

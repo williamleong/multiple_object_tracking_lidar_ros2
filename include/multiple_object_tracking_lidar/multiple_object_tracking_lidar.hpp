@@ -5,6 +5,7 @@
 
 #include <geometry_msgs/msg/point.hpp>
 #include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 #include "opencv2/video/tracking.hpp"
 
@@ -48,7 +49,7 @@ public:
     );
 private:
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub;
-    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr markerPub;
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr markerPub;
     rclcpp::Publisher<std_msgs::msg::Int32MultiArray>::SharedPtr objID_pub;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster0;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster1;
