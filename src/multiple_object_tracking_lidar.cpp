@@ -56,6 +56,7 @@ MultipleObjectTrackingLidar::MultipleObjectTrackingLidar(
 
   // cc_pos=this->create_publisher<std_msgs::msg::Float32MultiArray>("ccs", 100);//clusterCenter1
   markerPub = this->create_publisher<visualization_msgs::msg::MarkerArray>("viz", 1);
+  clusterPub = this->create_publisher<visualization_msgs::msg::MarkerArray>("cluster", 1);
 
   /* Point cloud clustering
    */
@@ -517,9 +518,9 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
      */
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(0.08);
-    ec.setMinClusterSize(10);
-    ec.setMaxClusterSize(600);
+    ec.setClusterTolerance(0.10);
+    ec.setMinClusterSize(3);
+    ec.setMaxClusterSize(10000);
     ec.setSearchMethod(tree);
     ec.setInputCloud(input_cloud);
     // std::cout<<"PCL init successfull\n";
@@ -545,7 +546,12 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
     for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
       float x = 0.0;
       float y = 0.0;
+      float z = 0.0;
       int numPts = 0;
+
+      // if (it->indices.size() > 10)
+      //   continue;
+
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(
           new pcl::PointCloud<pcl::PointXYZ>);
       for (pit = it->indices.begin(); pit != it->indices.end(); pit++) {
@@ -554,6 +560,7 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
 
         x += input_cloud->points[*pit].x;
         y += input_cloud->points[*pit].y;
+        z += input_cloud->points[*pit].z;
         numPts++;
 
         // dist_this_point = pcl::geometry::distance(input_cloud->points[*pit],
@@ -565,7 +572,7 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
       pcl::PointXYZ centroid;
       centroid.x = x / numPts;
       centroid.y = y / numPts;
-      centroid.z = 0.0;
+      centroid.z = z / numPts;
 
       cluster_vec.push_back(cloud_cluster);
 
@@ -573,6 +580,52 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
       clusterCentroids.push_back(centroid);
     }
     // std::cout<<"cluster_vec got some clusters\n";
+
+    //clear markers
+    {
+      visualization_msgs::msg::MarkerArray clusterMarkers;
+      visualization_msgs::msg::Marker m;
+      m.action = 3;
+      clusterMarkers.markers.push_back(m);
+      clusterPub->publish(clusterMarkers);
+    }
+
+
+    size_t clusterCounter = 0;
+    size_t pointID = 0;
+    for (const auto& currentCluster : cluster_vec)
+    {
+      visualization_msgs::msg::MarkerArray clusterMarkers;
+      visualization_msgs::msg::Marker m;
+
+      for (const auto& currentClusterPoint : currentCluster->points)
+      {
+        m.id = pointID++;
+        m.type = visualization_msgs::msg::Marker::CUBE;
+        m.header.frame_id = frame_id;
+        m.scale.x = 0.1;
+        m.scale.y = 0.1;
+        m.scale.z = 0.1;
+        m.action = visualization_msgs::msg::Marker::ADD;
+        m.color.a = 1.0;
+        m.color.r = clusterCounter % 2 ? 1 : 0;
+        m.color.g = clusterCounter % 3 ? 1 : 0;
+        m.color.b = clusterCounter % 4 ? 1 : 0;
+
+        geometry_msgs::msg::Point clusterC;
+        m.pose.position.x = currentClusterPoint.x;
+        m.pose.position.y = currentClusterPoint.y;
+        m.pose.position.z = currentClusterPoint.z;
+
+        clusterMarkers.markers.push_back(m);
+      }
+
+      clusterPub->publish(clusterMarkers);
+
+      clusterCounter++;
+    }
+
+    return;
 
     // Ensure at least 6 clusters exist to publish (later clusters may be empty)
     while (cluster_vec.size() < 6) {

@@ -6,7 +6,8 @@ import launch
 
 ################### user configure parameters for ros2 start ###################
 frame_id        = 'map'
-filtered_cloud  = 'filtered_cloud'
+# filtered_cloud  = '/point_cloud/full'
+filtered_cloud  = '/point_cloud/downsample'
 stateDim        = 4 # [x,y,v_x,v_y]//,w,h]
 measDim         = 2 # [z_x,z_y,z_w,z_h]
 ctrlDim         = 0
@@ -29,7 +30,11 @@ def generate_launch_description():
         output={
             'stdout': 'screen',
             'stderr': 'screen',
-        }
+        },
+
+        # https://gist.github.com/JADC362/a4425c2d05cdaadaaa71b697b674425f
+        # https://juraph.com/miscellaneous/ros2_and_gdb/
+        # prefix="gdbserver localhost:3000"
     )
 
     return LaunchDescription(

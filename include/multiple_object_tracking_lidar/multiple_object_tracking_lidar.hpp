@@ -50,6 +50,7 @@ public:
 private:
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr markerPub;
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr clusterPub;
     rclcpp::Publisher<std_msgs::msg::Int32MultiArray>::SharedPtr objID_pub;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster0;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster1;
